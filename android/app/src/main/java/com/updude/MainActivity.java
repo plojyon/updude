@@ -1,12 +1,17 @@
 package com.updude;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
 
 public class MainActivity extends ReactActivity {
+  public static final int RESULT_ENABLE = 11;
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -43,5 +48,21 @@ public class MainActivity extends ReactActivity {
       reactRootView.setIsFabric(BuildConfig.IS_NEW_ARCHITECTURE_ENABLED);
       return reactRootView;
     }
+  }
+
+  @Override
+  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    Log.d(MainActivity.class.getName(), String.format("%d, %d, %s", requestCode, resultCode, data));
+    switch(requestCode) {
+      case RESULT_ENABLE :
+        if (resultCode == Activity.RESULT_OK) {
+          Toast.makeText(MainActivity.this, "You have enabled the Admin Device features", Toast.LENGTH_SHORT).show();
+        } else {
+          Toast.makeText(MainActivity.this, "Problem to enable the Admin Device features", Toast.LENGTH_SHORT).show();
+        }
+        break;
+    }
+
+    super.onActivityResult(requestCode, resultCode, data);
   }
 }
