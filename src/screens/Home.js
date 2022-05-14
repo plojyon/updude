@@ -1,6 +1,11 @@
 import React from 'react';
-import {Box} from 'native-base';
+import {Box, Button} from 'native-base';
+import {hello} from '../services/settings';
 
 export default function Home() {
-  return <Box>Hello world</Box>;
+  return (
+    <Box>
+      <Button onPress={hello}>Hello World!</Button>
+    </Box>
+  );
 }
