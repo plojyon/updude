@@ -152,7 +152,7 @@ public class LockModule extends ReactContextBaseJavaModule {
         this.adapter.enableReaderMode(this.getCurrentActivity(), new NfcAdapter.ReaderCallback() {
             @Override
             public void onTagDiscovered(Tag tag) {
-                Log.d(LockModule.class.getName(), "Got tag id: " + bin2hex(tag.getId()));
+                sendEvent("NFCReadResult", bin2hex(tag.getId()));
             }
         }, FLAG_READER_NFC_A, new Bundle());
 

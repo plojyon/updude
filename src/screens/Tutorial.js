@@ -15,6 +15,12 @@ import {Title} from '../components/Text';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Pressable from 'react-native/Libraries/Components/Pressable/Pressable';
 import {
+  startNFCread,
+  startScan,
+  stopNFCread,
+  stopScan,
+} from '../services/settings';
+import {
   startForegroundService,
   startScan,
   stopScan,
@@ -27,11 +33,14 @@ const ChooseNFCScreen = ({navigation}) => {
   );
 
   useEffect(() => {
-    setTimeout(() => {
-      // set rfid uuid
-      Vibration.vibrate(100);
-      setUUID('98273403324');
-    }, 5000);
+    if (!uuid) {
+      startNFCread(uuid1 => {
+        console.log(`found ${uuid1}`);
+        Vibration.vibrate(100);
+        setUUID(uuid1);
+        stopNFCread();
+      });
+    }
   }, [uuid]);
 
   return (
@@ -126,9 +135,9 @@ const ChooseNFCScreen = ({navigation}) => {
 
 const ChooseBLEScreen = ({navigation}) => {
   const [devices, setDevices] = React.useState(null);
-  const [friendlyName, setFriendlyName] = React.useState(
+  /*const [friendlyName, setFriendlyName] = React.useState(
     slovenianNames[parseInt(Math.random() * slovenianNames.length)],
-  );
+  );*/
 
   const [isScanning, setIsScanning] = React.useState(false);
 
@@ -150,7 +159,7 @@ const ChooseBLEScreen = ({navigation}) => {
         event_thing.remove();
         setDevices(devices_temp);
         setIsScanning(false);
-      }, 5000);
+      }, 3000);
     }
   }, [isScanning, devices]);
 
@@ -158,7 +167,7 @@ const ChooseBLEScreen = ({navigation}) => {
     <ScrollView>
       <View p="5">
         <Title>Pick your device</Title>
-        <Box
+        {/*<Box
           mt={10}
           style={{borderColor: 'gray', borderWidth: 1}}
           borderRadius="5"
@@ -182,7 +191,7 @@ const ChooseBLEScreen = ({navigation}) => {
               value={friendlyName}
             />
           </Flex>
-        </Box>
+            </Box>*/}
         <Box
           mt={10}
           style={{borderColor: 'gray', borderWidth: 1}}
@@ -205,14 +214,14 @@ const ChooseBLEScreen = ({navigation}) => {
                       add_device: {
                         type: device.type,
                         uuid: device.uuid,
-                        name: friendlyName,
+                        name: device.name || device.uuid,
                       },
                     });
                     navigation.navigate('TutorialScreen', {
                       add_device: {
                         type: device.type,
                         uuid: device.uuid,
-                        name: friendlyName,
+                        name: device.name || device.uuid,
                       },
                     });
                   }}
@@ -440,10 +449,7 @@ export default () => (
 
 const TutorialScreen = ({route, navigation}) => {
   const [stepsNumber, setStepsNumber] = React.useState('200');
-  const [devices, setDevices] = React.useState([
-    {type: 'ble', uuid: '2', name: 'Coffee machine'},
-    {type: 'nfc', uuid: '6', name: 'Table tag'},
-  ]);
+  const [devices, setDevices] = React.useState([]);
 
   useEffect(() => {
     if (route.params && route.params.add_device) {
