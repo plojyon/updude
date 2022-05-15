@@ -5,6 +5,7 @@ import static android.content.Context.DEVICE_POLICY_SERVICE;
 import android.app.Activity;
 import android.app.admin.DevicePolicyManager;
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.widget.Toast;
 
@@ -14,10 +15,10 @@ public class Lock {
 
     private DevicePolicyManager devicePolicyManager;
     private ComponentName compName;
-    private Activity currActivity = null;
+    private Context currActivity = null;
     public static final int RESULT_ENABLE = 11;
 
-    public void init(Activity activity) {
+    public void init(Context activity) {
         if (currActivity != null) {
             return;
         }
@@ -26,11 +27,13 @@ public class Lock {
         devicePolicyManager = (DevicePolicyManager) currActivity.getSystemService(DEVICE_POLICY_SERVICE);
     }
 
-    public void enable() {
+    // WARNING: YOU MAY ONLY CALL ENABLE LOCK MODULE
+    public void enable(Activity activity) {
         Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
         intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName);
         intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Additional text explaining why we need this permission");
-        currActivity.startActivityForResult(intent, RESULT_ENABLE);
+        // TODO: do we need bellow line ?
+         activity.startActivityForResult(intent, RESULT_ENABLE);
     }
 
 

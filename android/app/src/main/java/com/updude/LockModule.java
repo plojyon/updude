@@ -2,6 +2,7 @@ package com.updude;
 
 import android.bluetooth.BluetoothDevice;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import static android.nfc.NfcAdapter.FLAG_READER_NFC_A;
@@ -14,6 +15,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
+import com.facebook.react.bridge.Callback;
 import com.facebook.react.bridge.ReactApplicationContext;
 
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -53,14 +55,10 @@ public class LockModule extends ReactContextBaseJavaModule {
         return "LockModule";
     }
 
-    public LockModule(ReactApplicationContext context) {
-        super(context);
-    }
-
     @ReactMethod
     public void enable() {
         lock.init(this.getCurrentActivity());
-        lock.enable();
+        lock.enable(this.getCurrentActivity());
     }
 
     @ReactMethod
@@ -96,10 +94,6 @@ public class LockModule extends ReactContextBaseJavaModule {
         bluetooth.startScan(new DeviceCallback() {
             @Override
             public void onResult(ArrayList<BluetoothDevice> devices) {
-                // TODO: test
-                for (BluetoothDevice device : devices) {
-                    Log.d("LockModule", device.toString());
-                }
                 sendEvent("BluetoothScanResult", serializeBluetoothDevices(devices));
             }
         });
@@ -111,15 +105,25 @@ public class LockModule extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
-    public String getBluetoothDeviceUuid() {
-        return getSharedPref().getString("bluetooth_device_uuid", null);
+    public void getSettings(Callback callback) {
+        Log.d("LockModule", "get settings");
+        WritableMap map = new WritableNativeMap();
+        map.putString("type", Storage.get(getCurrentActivity(), "type"));
+        map.putString("value", Storage.get(getCurrentActivity(), "value"));
+        Log.d("LockModule", map.toString());
+        callback.invoke(map);
     }
 
     @ReactMethod
-    public void setBluetoothDeviceUuid(String uuid) {
-        SharedPreferences.Editor editor = getSharedPref().edit();
-        editor.putString("bluetooth_device_uuid", uuid);
-        editor.apply();
+    public void updateSettings(String type, String value) {
+        Log.d("LockModule", "update settings");
+        Storage.update(getCurrentActivity(), "type", type);
+        Storage.update(getCurrentActivity(), "value", value);
+    }
+
+    @ReactMethod
+    public void startForegroundService() {
+        getCurrentActivity().startService(new Intent(getCurrentActivity(), ForegroundService.class));
     }
 
     private WritableArray serializeBluetoothDevices(ArrayList<BluetoothDevice> devices) {
@@ -137,10 +141,6 @@ public class LockModule extends ReactContextBaseJavaModule {
         getReactApplicationContext()
                 .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
                 .emit(name, data);
-    }
-
-    private SharedPreferences getSharedPref() {
-        return Objects.requireNonNull(getCurrentActivity()).getPreferences(Context.MODE_PRIVATE);
     }
 
     @ReactMethod

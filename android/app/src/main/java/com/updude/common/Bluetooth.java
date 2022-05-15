@@ -9,9 +9,9 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
+import android.content.Context;
 import android.util.Log;
 
-import com.facebook.react.bridge.ReactMethod;
 import com.updude.LockModule;
 
 import java.util.ArrayList;
@@ -28,7 +28,7 @@ public class Bluetooth {
     private BluetoothLeScanner scanner = null;
     private final ArrayList<BluetoothDevice> devices = new ArrayList<>();
 
-    public void init(Activity activity) {
+    public void init(Context activity) {
         // Obtain a Bluetooth adapter.
         // This cannot be done in the constructor because the current activity isn't available
         // and thus we cannot retrieve the context. Because of that, we call init() at the start
@@ -71,7 +71,7 @@ public class Bluetooth {
 
                 Log.d(LockModule.class.getName(), "Scanned: " + result.getDevice().toString());
 
-                if (!includesDevices(result.getDevice())) {
+                if (!isDeviceInRange(result.getDevice())) {
                     devices.add(result.getDevice());
                     callback.onResult(devices);
                 }
@@ -88,9 +88,18 @@ public class Bluetooth {
         return OK;
     }
 
-    private boolean includesDevices(BluetoothDevice targetDevice) {
+    public boolean isDeviceInRange(BluetoothDevice targetDevice) {
         for (BluetoothDevice device : devices) {
             if (device.equals(targetDevice)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public boolean isDeviceInRange(String uuid) {
+        for (BluetoothDevice device : devices) {
+            if (device.toString().equals(uuid)) {
                 return true;
             }
         }

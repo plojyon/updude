@@ -28,15 +28,6 @@ export function stopScan() {
   return LockModule.stopScan();
 }
 
-export function getBluetoothDeviceUuid() {
-  // TODO: fix
-  return LockModule.getBluetoothDeviceUuid();
-}
-
-export function setBluetoothDeviceUuid(value) {
-  return LockModule.setBluetoothDeviceUuid(value);
-}
-
 export function enable() {
   return LockModule.enable();
 }
@@ -47,4 +38,16 @@ export function disable() {
 
 export function lock() {
   return LockModule.lock();
+}
+
+export function startForegroundService() {
+  LockModule.startForegroundService();
+}
+
+export function updateSettings(type, value) {
+  LockModule.updateSettings(type, value);
+}
+
+export function getSettings(callback) {
+  LockModule.getSettings(callback);
 }

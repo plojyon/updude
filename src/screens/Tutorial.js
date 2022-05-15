@@ -14,7 +14,11 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {Title} from '../components/Text';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Pressable from 'react-native/Libraries/Components/Pressable/Pressable';
-import {startScan, stopScan} from '../services/settings';
+import {
+  startForegroundService,
+  startScan,
+  stopScan,
+} from "../services/settings";
 
 const ChooseNFCScreen = ({navigation}) => {
   const [uuid, setUUID] = React.useState();
@@ -516,10 +520,7 @@ const TutorialScreen = ({route, navigation}) => {
           <AddDeviceComponent onAdd={() => navigation.navigate('AddDevice')} />
         </Box>
         <Box borderRadius="5" width={'100%'} mt={5}>
-          <Button
-            onPress={() => {
-              console.log('ok');
-            }}>
+          <Button onPress={startForegroundService}>
             <Text>Save settings</Text>
           </Button>
         </Box>
