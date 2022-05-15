@@ -48,3 +48,21 @@ export function disable() {
 export function lock() {
   return LockModule.lock();
 }
+
+export function startNFCread(callback) {
+  console.log('starting NFC read');
+  LockModule.startReading();
+  const eventListener = eventEmitter.addListener('NFCReadResult', callback);
+
+  console.log(eventListener);
+  // TODO: call unsubscribe methods
+  // https://reactnative.dev/docs/native-modules-android#sending-events-to-javascript
+  LockModule.startReading();
+  return eventListener;
+}
+
+export function stopNFCread() {
+  console.log('stopping NFC read');
+  eventEmitter.removeAllListeners('NFCReadResult');
+  return LockModule.stopReading();
+}

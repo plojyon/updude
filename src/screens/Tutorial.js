@@ -14,7 +14,12 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {Title} from '../components/Text';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Pressable from 'react-native/Libraries/Components/Pressable/Pressable';
-import {startScan, stopScan} from '../services/settings';
+import {
+  startNFCread,
+  startScan,
+  stopNFCread,
+  stopScan,
+} from '../services/settings';
 
 const ChooseNFCScreen = ({navigation}) => {
   const [uuid, setUUID] = React.useState();
@@ -23,11 +28,14 @@ const ChooseNFCScreen = ({navigation}) => {
   );
 
   useEffect(() => {
-    setTimeout(() => {
-      // set rfid uuid
-      Vibration.vibrate(100);
-      setUUID('98273403324');
-    }, 5000);
+    if (!uuid) {
+      startNFCread(uuid1 => {
+        console.log(`found ${uuid1}`);
+        Vibration.vibrate(100);
+        setUUID(uuid1);
+        stopNFCread();
+      });
+    }
   }, [uuid]);
 
   return (
@@ -436,10 +444,7 @@ export default () => (
 
 const TutorialScreen = ({route, navigation}) => {
   const [stepsNumber, setStepsNumber] = React.useState('200');
-  const [devices, setDevices] = React.useState([
-    {type: 'ble', uuid: '2', name: 'Coffee machine'},
-    {type: 'nfc', uuid: '6', name: 'Table tag'},
-  ]);
+  const [devices, setDevices] = React.useState([]);
 
   useEffect(() => {
     if (route.params && route.params.add_device) {
