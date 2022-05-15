@@ -1,5 +1,8 @@
 package com.updude;
 
+import android.bluetooth.BluetoothDevice;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.util.Log;
 
@@ -7,22 +10,23 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import com.facebook.react.bridge.ReactApplicationContext;
-
-import static android.content.Context.BLUETOOTH_SERVICE;
-
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableArray;
+import com.facebook.react.bridge.WritableMap;
+import com.facebook.react.bridge.WritableNativeArray;
+import com.facebook.react.bridge.WritableNativeMap;
+import com.facebook.react.modules.core.DeviceEventManagerModule;
+import com.updude.common.Bluetooth;
+import com.updude.common.DeviceCallback;
 import com.updude.common.Lock;
-import com.facebook.react.bridge.ReactApplicationContext;
 
-import android.bluetooth.le.ScanResult;
-import android.bluetooth.le.BluetoothLeScanner;
-import android.bluetooth.le.ScanCallback;
-import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothManager;
+import java.util.ArrayList;
+import java.util.Objects;
 
 public class LockModule extends ReactContextBaseJavaModule {
     private final Lock lock = new Lock();
+    private final Bluetooth bluetooth = new Bluetooth();
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     LockModule(ReactApplicationContext context) {
@@ -34,35 +38,12 @@ public class LockModule extends ReactContextBaseJavaModule {
     public String getName() {
         return "LockModule";
     }
-	public static final int ALREADY_SCANNING = 1;
-	public static final int BLUETOOTH_IS_OFF = 2;
-	public static final int OK = 0;
-
-	private BluetoothAdapter adapter = null;
-
-	private boolean isScanning = false;
-	private ScanCallback scanCallback = null;
-	private BluetoothLeScanner scanner = null;
-
-	private void init() {
-		// Obtain a Bluetooth adapter.
-		// This cannot be done in the constructor because the current activity isn't available
-		// and thus we cannot retrieve the context. Because of that, we call init() at the start
-		// of any method that requires the BT adapter.
-		if (this.adapter != null)
-			return;
-		BluetoothManager manager = (BluetoothManager) this.getCurrentActivity().getSystemService(BLUETOOTH_SERVICE);
-		this.adapter = manager.getAdapter();
-	}
-
-
 
     @ReactMethod
     public void enable() {
         lock.init(this.getCurrentActivity());
         lock.enable();
     }
-
 
     @ReactMethod
     public void disable() {
@@ -78,51 +59,60 @@ public class LockModule extends ReactContextBaseJavaModule {
 
 	@ReactMethod
 	public void stopScan() {
-		this.init();
-
-		if (!this.isScanning)
-			return;
-
-		this.scanner.stopScan(this.scanCallback);
+		bluetooth.init(this.getCurrentActivity());
+		bluetooth.stopScan();
 	}
 
 	@ReactMethod
-	public int startScan() {
-		this.init();
-
-		if (this.isScanning)
-			return ALREADY_SCANNING;
-
-		this.isScanning = true;
-
-		this.scanner = this.adapter.getBluetoothLeScanner();
-		if (this.scanner == null) { // Bluetooth is disabled?
-			this.isScanning = false;
-			return BLUETOOTH_IS_OFF;
-		}
-
-		this.scanCallback = new ScanCallback() {
-			@Override
-			public void onScanResult(int callbackType, ScanResult result) {
-				super.onScanResult(callbackType, result);
-				Log.d(LockModule.class.getName(), "Scanned: " + result.getDevice().toString());
-				// leDeviceListAdapter.addDevice(result.getDevice());
-				// leDeviceListAdapter.notifyDataSetChanged();
-			}
-
-			@Override
-			public void onScanFailed(int errorCode) {
-				super.onScanFailed(errorCode);
-				Log.d(LockModule.class.getName(), "Error: " + Integer.toString(errorCode));
-			}
-		};
-
-		this.scanner.startScan(this.scanCallback);
-		return OK;
-    }
+	public void startScan() {
+		bluetooth.init(this.getCurrentActivity());
+		bluetooth.startScan(new DeviceCallback() {
+            @Override
+            public void onResult(ArrayList<BluetoothDevice> devices) {
+                // TODO: test
+                for (BluetoothDevice device : devices) {
+                    Log.d("LockModule", device.toString());
+                }
+                 sendEvent("BluetoothScanResult", serializeBluetoothDevices(devices));
+            }
+        });
+	}
 
     @ReactMethod
     public boolean isAdminActive() {
         return lock.isAdminActive();
+    }
+
+    @ReactMethod
+    public String getBluetoothDeviceUuid() {
+        return getSharedPref().getString("bluetooth_device_uuid", null);
+    }
+
+    @ReactMethod
+    public void setBluetoothDeviceUuid(String uuid) {
+        SharedPreferences.Editor editor = getSharedPref().edit();
+        editor.putString("bluetooth_device_uuid", uuid);
+        editor.apply();
+    }
+
+    private WritableArray serializeBluetoothDevices(ArrayList<BluetoothDevice> devices) {
+        WritableArray array = new WritableNativeArray();
+        for (BluetoothDevice device : devices) {
+            WritableMap map = new WritableNativeMap();
+            map.putString("uuid", device.toString());
+            map.putString("name", device.getName());
+            array.pushMap(map);
+        }
+        return array;
+    }
+
+    private void sendEvent(String name, Object data) {
+        getReactApplicationContext()
+                .getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class)
+                .emit(name, data);
+    }
+
+    private SharedPreferences getSharedPref() {
+        return Objects.requireNonNull(getCurrentActivity()).getPreferences(Context.MODE_PRIVATE);
     }
 }
