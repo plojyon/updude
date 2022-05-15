@@ -130,9 +130,9 @@ const ChooseNFCScreen = ({navigation}) => {
 
 const ChooseBLEScreen = ({navigation}) => {
   const [devices, setDevices] = React.useState(null);
-  const [friendlyName, setFriendlyName] = React.useState(
+  /*const [friendlyName, setFriendlyName] = React.useState(
     slovenianNames[parseInt(Math.random() * slovenianNames.length)],
-  );
+  );*/
 
   const [isScanning, setIsScanning] = React.useState(false);
 
@@ -154,7 +154,7 @@ const ChooseBLEScreen = ({navigation}) => {
         event_thing.remove();
         setDevices(devices_temp);
         setIsScanning(false);
-      }, 5000);
+      }, 3000);
     }
   }, [isScanning, devices]);
 
@@ -162,7 +162,7 @@ const ChooseBLEScreen = ({navigation}) => {
     <ScrollView>
       <View p="5">
         <Title>Pick your device</Title>
-        <Box
+        {/*<Box
           mt={10}
           style={{borderColor: 'gray', borderWidth: 1}}
           borderRadius="5"
@@ -186,7 +186,7 @@ const ChooseBLEScreen = ({navigation}) => {
               value={friendlyName}
             />
           </Flex>
-        </Box>
+            </Box>*/}
         <Box
           mt={10}
           style={{borderColor: 'gray', borderWidth: 1}}
@@ -209,14 +209,14 @@ const ChooseBLEScreen = ({navigation}) => {
                       add_device: {
                         type: device.type,
                         uuid: device.uuid,
-                        name: friendlyName,
+                        name: device.name || device.uuid,
                       },
                     });
                     navigation.navigate('TutorialScreen', {
                       add_device: {
                         type: device.type,
                         uuid: device.uuid,
-                        name: friendlyName,
+                        name: device.name || device.uuid,
                       },
                     });
                   }}
