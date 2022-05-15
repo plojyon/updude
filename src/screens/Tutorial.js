@@ -14,6 +14,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import {Title} from '../components/Text';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Pressable from 'react-native/Libraries/Components/Pressable/Pressable';
+import {startScan, stopScan} from '../services/settings';
 
 const ChooseNFCScreen = ({navigation}) => {
   const [uuid, setUUID] = React.useState();
@@ -125,85 +126,113 @@ const ChooseBLEScreen = ({navigation}) => {
     slovenianNames[parseInt(Math.random() * slovenianNames.length)],
   );
 
+  const [isScanning, setIsScanning] = React.useState(false);
+
   useEffect(() => {
-    setTimeout(() => {
-      // set rfid uuid
-      Vibration.vibrate(100);
-      setDevices([
-        {type: 'ble', name: 'test', uuid: 'fsdfsdf'},
-        {type: 'ble', name: 'test2', uuid: '2827293402sdfds934803403324'},
-      ]);
-    }, 5000);
-  }, []);
+    if (!isScanning && !devices) {
+      console.log('starting scan');
+      setIsScanning(true);
+      let devices_temp = [];
+      const event_thing = startScan(devices_arr => {
+        console.log('data got!');
+        devices_temp = devices_arr
+          .map(device => ({...device, type: 'ble'}))
+          .sort((a, b) => (!!a.name ? -1 : 1));
+      });
+
+      setTimeout(() => {
+        console.log('ended scan');
+        stopScan();
+        event_thing.remove();
+        setDevices(devices_temp);
+        setIsScanning(false);
+      }, 5000);
+    }
+  }, [isScanning, devices]);
 
   return (
-    <ScrollView p="5">
-      <Title>Pick your device</Title>
-      <Box
-        mt={10}
-        style={{borderColor: 'gray', borderWidth: 1}}
-        borderRadius="5"
-        width={'100%'}
-        p="4">
-        <Flex flexDirection={'row'} justifyContent="center" alignItems="center">
-          <Text fontSize={20}>Bluetooth tag name: </Text>
-          <TextInput
-            style={{
-              color: main_color,
-              fontSize: 20,
-              fontWeight: 'bold',
-              borderBottomColor: main_color,
-              borderBottomWidth: 1,
-              textAlign: 'center',
-            }}
-            onChangeText={text => setFriendlyName(text)}
-            value={friendlyName}
-          />
-        </Flex>
-      </Box>
-      <Box
-        mt={10}
-        style={{borderColor: 'gray', borderWidth: 1}}
-        borderRadius="5"
-        width={'100%'}
-        p="4">
-        <Text fontSize="15" mb="10">
-          Available devices
-        </Text>
-        {devices &&
-          devices.map(device => (
-            <View key={device.uuid}>
-              <DeviceComponent
-                type={device.type}
-                name={device.name}
-                uuid={device.uuid}
-                custom_text_fnct={name => `Select ${name}`}
-                on_side_press={() => {
-                  console.log('from plus, adding device', {
-                    add_device: {
-                      type: device.type,
-                      uuid: device.uuid,
-                      name: friendlyName,
-                    },
-                  });
-                  navigation.navigate('TutorialScreen', {
-                    add_device: {
-                      type: device.type,
-                      uuid: device.uuid,
-                      name: friendlyName,
-                    },
-                  });
-                }}
-                sideIcon={<Entypo name={'plus'} size={20} color={'green'} />}
-              />
+    <ScrollView>
+      <View p="5">
+        <Title>Pick your device</Title>
+        <Box
+          mt={10}
+          style={{borderColor: 'gray', borderWidth: 1}}
+          borderRadius="5"
+          width={'100%'}
+          p="4">
+          <Flex
+            flexDirection={'row'}
+            justifyContent="center"
+            alignItems="center">
+            <Text fontSize={20}>Bluetooth tag name: </Text>
+            <TextInput
+              style={{
+                color: main_color,
+                fontSize: 20,
+                fontWeight: 'bold',
+                borderBottomColor: main_color,
+                borderBottomWidth: 1,
+                textAlign: 'center',
+              }}
+              onChangeText={text => setFriendlyName(text)}
+              value={friendlyName}
+            />
+          </Flex>
+        </Box>
+        <Box
+          mt={10}
+          style={{borderColor: 'gray', borderWidth: 1}}
+          borderRadius="5"
+          width={'100%'}
+          p="4">
+          <Text fontSize="15" mb="10">
+            Available devices
+          </Text>
+          {devices &&
+            devices.map(device => (
+              <View key={device.uuid}>
+                <DeviceComponent
+                  type={device.type}
+                  name={device.name}
+                  uuid={device.uuid}
+                  custom_text_fnct={name => `Select ${name}`}
+                  on_side_press={() => {
+                    console.log('from plus, adding device', {
+                      add_device: {
+                        type: device.type,
+                        uuid: device.uuid,
+                        name: friendlyName,
+                      },
+                    });
+                    navigation.navigate('TutorialScreen', {
+                      add_device: {
+                        type: device.type,
+                        uuid: device.uuid,
+                        name: friendlyName,
+                      },
+                    });
+                  }}
+                  sideIcon={<Entypo name={'plus'} size={20} color={'green'} />}
+                />
+              </View>
+            ))}
+          {devices && (
+            <Pressable
+              onPress={() => {
+                setDevices(null);
+              }}>
+              <Text mt="5" textAlign="center">
+                Scan again
+              </Text>
+            </Pressable>
+          )}
+          {!devices && (
+            <View mb={10}>
+              <ActivityIndicator />
             </View>
-          ))}
-        {!devices && (
-          <View mb={10}>
-            <ActivityIndicator />
-          </View>
-        )}
-      </Box>
+          )}
+        </Box>
+      </View>
     </ScrollView>
   );
 };
@@ -472,7 +501,7 @@ const TutorialScreen = ({route, navigation}) => {
           borderRadius="5"
           width={'100%'}
           p="4"
-          mt={10}>
+          mt={5}>
           <Text style={{color: 'white'}} flexShrink={1} fontSize={15} mb="10">
             List of devices that will unlock your phone
           </Text>
@@ -485,6 +514,14 @@ const TutorialScreen = ({route, navigation}) => {
             />
           ))}
           <AddDeviceComponent onAdd={() => navigation.navigate('AddDevice')} />
+        </Box>
+        <Box borderRadius="5" width={'100%'} mt={5}>
+          <Button
+            onPress={() => {
+              console.log('ok');
+            }}>
+            <Text>Save settings</Text>
+          </Button>
         </Box>
       </Center>
     </ScrollView>
