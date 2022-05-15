@@ -9,17 +9,17 @@ import {
 
 export default function Home() {
   return (
-    <Box>
-      <Button onPress={() => enable()}>Enable admin</Button>
-      <Button onPress={() => startScan(console.log)}>Start scan</Button>
-      <Button onPress={stopScan}>Stop scan</Button>
-      <Button onPress={() => getSettings(console.log)}>
+    <Box p="5">
+      <Button mt={5} onPress={() => enable()}>Enable admin</Button>
+      <Button mt={5} onPress={() => startScan(console.log)}>Start scan</Button>
+      <Button mt={5} onPress={stopScan}>Stop scan</Button>
+      <Button mt={5} onPress={() => getSettings(console.log)}>
         Get bluetooth uuid
       </Button>
-      <Button onPress={() => updateSettings('bluetooth', 'B8:72:EB:5B:F6:03')}>
+      <Button mt={5} onPress={() => updateSettings('bluetooth', 'B8:72:EB:5B:F6:03')}>
         Set bluetooth uuid
       </Button>
-      <Button onPress={() => startForegroundService()}>
+      <Button mt={5} onPress={() => startForegroundService()}>
         ACTIVATE
       </Button>
     </Box>

@@ -19,12 +19,8 @@ import {
   startScan,
   stopNFCread,
   stopScan,
-} from '../services/settings';
-import {
   startForegroundService,
-  startScan,
-  stopScan,
-} from "../services/settings";
+} from '../services/settings';
 
 const ChooseNFCScreen = ({navigation}) => {
   const [uuid, setUUID] = React.useState();
