@@ -1,16 +1,40 @@
 package com.updude;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
+import com.updude.common.Lock;
+import com.updude.receivers.UnlockReceiver;
 
 public class MainActivity extends ReactActivity {
+  private final Lock lock = new Lock();
+  private static final int REQUEST_LOCATION_ENABLE_CODE = 1; // StackOverflow told me
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(null);
+    lock.init(this);
+    IntentFilter intentFilter = new IntentFilter(Intent.ACTION_USER_PRESENT);
+    BroadcastReceiver mReceiver = new UnlockReceiver(lock);
+    registerReceiver(mReceiver, intentFilter);
+    if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+            android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+    } else {
+      ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+              REQUEST_LOCATION_ENABLE_CODE);
+    }
   }
 
   /**
@@ -43,5 +67,21 @@ public class MainActivity extends ReactActivity {
       reactRootView.setIsFabric(BuildConfig.IS_NEW_ARCHITECTURE_ENABLED);
       return reactRootView;
     }
+  }
+
+  @Override
+  public void onActivityResult(int requestCode, int resultCode, Intent data) {
+    Log.d(MainActivity.class.getName(), String.format("%d, %d, %s", requestCode, resultCode, data));
+    switch(requestCode) {
+      case Lock.RESULT_ENABLE:
+        if (resultCode == Activity.RESULT_OK) {
+          Toast.makeText(MainActivity.this, "You have enabled the Admin Device features", Toast.LENGTH_SHORT).show();
+        } else {
+          Toast.makeText(MainActivity.this, "Problem to enable the Admin Device features", Toast.LENGTH_SHORT).show();
+        }
+        break;
+    }
+
+    super.onActivityResult(requestCode, resultCode, data);
   }
 }

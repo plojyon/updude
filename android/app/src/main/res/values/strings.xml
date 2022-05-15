@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">UpDude</string>
+    <string name="preference_file">updude</string>
 </resources>
