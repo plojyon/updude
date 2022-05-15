@@ -1,4 +1,4 @@
-package com.updude;
+package com.updude.receivers;
 
 import android.app.admin.DeviceAdminReceiver;
 import android.content.Context;

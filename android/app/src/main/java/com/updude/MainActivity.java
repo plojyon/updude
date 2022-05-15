@@ -1,7 +1,9 @@
 package com.updude;
 
 import android.app.Activity;
+import android.content.BroadcastReceiver;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -9,13 +11,19 @@ import android.widget.Toast;
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
+import com.updude.common.Lock;
+import com.updude.receivers.UnlockReceiver;
 
 public class MainActivity extends ReactActivity {
-  public static final int RESULT_ENABLE = 11;
+  private final Lock lock = new Lock();
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(null);
+    lock.init(this);
+    IntentFilter intentFilter = new IntentFilter(Intent.ACTION_USER_PRESENT);
+    BroadcastReceiver mReceiver = new UnlockReceiver(lock);
+    registerReceiver(mReceiver, intentFilter);
   }
 
   /**
@@ -54,7 +62,7 @@ public class MainActivity extends ReactActivity {
   public void onActivityResult(int requestCode, int resultCode, Intent data) {
     Log.d(MainActivity.class.getName(), String.format("%d, %d, %s", requestCode, resultCode, data));
     switch(requestCode) {
-      case RESULT_ENABLE :
+      case Lock.RESULT_ENABLE:
         if (resultCode == Activity.RESULT_OK) {
           Toast.makeText(MainActivity.this, "You have enabled the Admin Device features", Toast.LENGTH_SHORT).show();
         } else {

@@ -1,15 +1,7 @@
 package com.updude;
-import static android.content.Context.ACTIVITY_SERVICE;
-import static android.content.Context.DEVICE_POLICY_SERVICE;
 
-import android.app.Activity;
-import android.app.ActivityManager;
-import android.app.admin.DevicePolicyManager;
-import android.content.ComponentName;
-import android.content.Intent;
 import android.os.Build;
 import android.util.Log;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
@@ -17,13 +9,10 @@ import androidx.annotation.RequiresApi;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.updude.common.Lock;
 
 public class LockModule extends ReactContextBaseJavaModule {
-    private ActivityManager activityManager;
-    private DevicePolicyManager devicePolicyManager;
-    private ComponentName compName;
-    private Activity currActivity = null;
-    public static final int RESULT_ENABLE = 11;
+    private final Lock lock = new Lock();
 
     @RequiresApi(api = Build.VERSION_CODES.M)
     LockModule(ReactApplicationContext context) {
@@ -36,41 +25,23 @@ public class LockModule extends ReactContextBaseJavaModule {
         return "LockModule";
     }
 
-    private void init() {
-        if (currActivity != null) {
-            return;
-        }
-        currActivity = this.getCurrentActivity();
-        compName = new ComponentName(currActivity, AdminReceiver.class);
-        activityManager = (ActivityManager) currActivity.getSystemService(ACTIVITY_SERVICE);
-        devicePolicyManager = (DevicePolicyManager) currActivity.getSystemService(DEVICE_POLICY_SERVICE);
-    }
-
     @ReactMethod
     public void enable() {
-        init();
-        Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-        intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, compName);
-        intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, "Additional text explaining why we need this permission");
-        currActivity.startActivityForResult(intent, RESULT_ENABLE);
+        lock.init(this.getCurrentActivity());
+        lock.enable();
     }
 
 
     @ReactMethod
     public void disable() {
-        init();
-        devicePolicyManager.removeActiveAdmin(compName);
+        lock.init(this.getCurrentActivity());
+        lock.disable();
     }
 
     @ReactMethod
     public void lock() {
-        init();
-        boolean active = devicePolicyManager.isAdminActive(compName);
-        if (active) {
-            devicePolicyManager.lockNow();
-        } else {
-            Toast.makeText(currActivity, "You need to enable the Admin Device Features", Toast.LENGTH_SHORT).show();
-        }
+        lock.init(this.getCurrentActivity());
+        lock.lock();
     }
 
     @ReactMethod
@@ -80,6 +51,6 @@ public class LockModule extends ReactContextBaseJavaModule {
 
     @ReactMethod
     public boolean isAdminActive() {
-        return devicePolicyManager.isAdminActive(compName);
+        return lock.isAdminActive();
     }
 }

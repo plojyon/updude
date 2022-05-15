@@ -12,7 +12,7 @@
         android:theme="@style/AppTheme">
 
         <receiver
-            android:name=".AdminReceiver"
+            android:name=".receivers.AdminReceiver"
             android:exported="false"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
             <meta-data
