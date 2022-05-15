@@ -2,7 +2,6 @@ package com.updude.common;
 
 import static android.content.Context.BLUETOOTH_SERVICE;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -48,7 +47,7 @@ public class Bluetooth {
         this.scanner.stopScan(this.scanCallback);
     }
 
-    public int startScan(DeviceCallback callback) {
+    public int startScan(BluetoothCallback callback) {
         if (this.isScanning)
             return ALREADY_SCANNING;
 

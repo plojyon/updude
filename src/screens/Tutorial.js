@@ -570,6 +570,14 @@ const TutorialScreen = ({route, navigation}) => {
             <Text>Save settings</Text>
           </Button>
         </Box>
+        <Box borderRadius="5" width={'100%'} mt={5}>
+          <Button
+            onPress={() => {
+              startForegroundService();
+            }}>
+            <Text>Activate</Text>
+          </Button>
+        </Box>
       </Center>
     </ScrollView>
   );

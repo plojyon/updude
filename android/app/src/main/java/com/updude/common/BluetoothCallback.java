@@ -4,6 +4,6 @@ import android.bluetooth.BluetoothDevice;
 
 import java.util.ArrayList;
 
-public interface DeviceCallback {
+public interface BluetoothCallback {
     void onResult(ArrayList<BluetoothDevice> devices);
 }

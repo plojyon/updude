@@ -62,7 +62,7 @@ export function startNFCread(callback) {
 
 export function stopNFCread() {
   console.log('stopping NFC read');
-  eventEmitter.removeAllListeners('NFCReadResult');
+  eventEmitter.removeAllListeners('ta');
   return LockModule.stopReading();
 }
 

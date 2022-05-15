@@ -16,18 +16,21 @@ import androidx.annotation.RequiresApi;
 import androidx.core.app.NotificationCompat;
 
 import com.updude.common.Bluetooth;
-import com.updude.common.DeviceCallback;
+import com.updude.common.BluetoothCallback;
 import com.updude.common.Lock;
+import com.updude.common.Nfc;
+import com.updude.common.NfcCallback;
 
 import java.util.ArrayList;
 
 
 public class ForegroundService extends Service {
     private static String CHANNEL_ID = "12";
-    private final Bluetooth bluetooth = new Bluetooth();
     private final Lock lock = new Lock();
-    private String type;
-    private String value;
+    private final Nfc nfc1 = new Nfc();
+    private Bluetooth bluetooth;
+    private String ble;
+    private String nfc;
 
     @Nullable
     @Override
@@ -53,19 +56,35 @@ public class ForegroundService extends Service {
 
         startForeground(1, notification);
 
-        type = Storage.get(getApplicationContext(), "type");
-        value = Storage.get(getApplicationContext(), "value");
+        ble = Storage.get(getApplicationContext(), "ble");
+        nfc = Storage.get(getApplicationContext(), "nfc");
+        nfc1.init(getApplicationContext());
         lock.init(getApplicationContext());
-        lock.lock();
+//        lock.lock();
 
-        switch (type) {
+
+
+        if (nfc != null) {
+            nfc1.startReading(new NfcCallback() {
+                @Override
+                public void onResult(String tag) {
+                    Log.d("NFC", tag + ", " + nfc);
+                    if (tag.equals(nfc)) {
+                        Log.d("EQUALS", tag);
+                    }
+                }
+            });
+        }
+
+//
+        switch (ble) {
             case "bluetooth": {
                 // here is the code you wanna run in background
                 bluetooth.init(getApplicationContext());
-                bluetooth.startScan(new DeviceCallback() {
+                bluetooth.startScan(new BluetoothCallback() {
                     @Override
                     public void onResult(ArrayList<BluetoothDevice> devices) {
-                        if (bluetooth.isDeviceInRange(value)) {
+                        if (bluetooth.isDeviceInRange(nfc)) {
                             Log.d("ForegroundService", "device in range");
                             lock.disable();
                         }
@@ -90,9 +109,8 @@ public class ForegroundService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        switch (type) {
+        switch (ble) {
             case "bluetooth": {
-                bluetooth.stopScan();
                 break;
             }
             case "nfc": {
