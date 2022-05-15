@@ -1,16 +1,27 @@
 package com.updude;
 
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.facebook.react.ReactActivity;
 import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
 
 public class MainActivity extends ReactActivity {
+  private static final int REQUEST_LOCATION_ENABLE_CODE = 1; // StackOverflow told me
 
   @Override
   protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(null);
+    if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+            android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+    } else {
+      ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+              REQUEST_LOCATION_ENABLE_CODE);
+    }
   }
 
   /**
