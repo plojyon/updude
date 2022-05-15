@@ -1,8 +1,18 @@
 package com.updude;
 
+import static android.content.Context.SENSOR_SERVICE;
+import static android.hardware.Sensor.TYPE_STEP_COUNTER;
+
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
+import android.util.Log;
+
 import com.facebook.react.ReactPackage;
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
+import com.facebook.react.bridge.ReactMethod;
 import com.facebook.react.uimanager.ViewManager;
 
 import java.util.ArrayList;
