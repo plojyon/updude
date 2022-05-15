@@ -5,6 +5,8 @@ import android.content.BroadcastReceiver;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.nfc.NfcAdapter;
+import android.nfc.Tag;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
@@ -17,6 +19,8 @@ import com.facebook.react.ReactActivityDelegate;
 import com.facebook.react.ReactRootView;
 import com.updude.common.Lock;
 import com.updude.receivers.UnlockReceiver;
+
+import java.math.BigInteger;
 
 public class MainActivity extends ReactActivity {
   private final Lock lock = new Lock();
@@ -67,6 +71,18 @@ public class MainActivity extends ReactActivity {
       reactRootView.setIsFabric(BuildConfig.IS_NEW_ARCHITECTURE_ENABLED);
       return reactRootView;
     }
+  }
+
+  @Override
+  public void onNewIntent(Intent intent) {
+    super.onNewIntent(intent);
+
+    Tag tag = intent.getParcelableExtra(NfcAdapter.EXTRA_TAG);
+    Log.d("abcd", bin2hex(tag.getId()));
+  }
+
+  private static String bin2hex(byte[] data) {
+    return String.format("%0" + (data.length * 2) + "X", new BigInteger(1, data));
   }
 
   @Override

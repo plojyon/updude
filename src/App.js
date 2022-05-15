@@ -33,7 +33,7 @@ const App: () => Node = () => {
       <StatusBar hidden />
       <NavigationContainer theme={BlackTheme}>
         <Stack.Navigator screenOptions={{headerShown: false}}>
-          {/*<Stack.Screen name="Tutorial" component={Tutorial} />*/}
+          <Stack.Screen name="Tutorial" component={Tutorial} />
           <Stack.Screen name="Home" component={Home} />
         </Stack.Navigator>
       </NavigationContainer>

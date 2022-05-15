@@ -477,15 +477,12 @@ const TutorialScreen = ({route, navigation}) => {
           setStepsNumber(obj['steps']);
         }
 
-        console.log(ot);
         setDevices(ot);
       });
     }
     if (route.params && route.params.add_device) {
-      console.log(route.params.add_device);
       if (
         devices.filter(({uuid}) => {
-          console.log(uuid, route.params.add_device.uuid);
           return uuid == route.params.add_device.uuid;
         }).length == 0
       ) {
