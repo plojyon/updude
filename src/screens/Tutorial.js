@@ -510,7 +510,7 @@ const TutorialScreen = ({route, navigation}) => {
           width={'100%'}
           p="4"
           mb="10">
-          <Title>Welcome to updude</Title>
+          <Title>Welcome to wakelock</Title>
         </Box>
         <Box
           style={{borderColor: 'gray', borderWidth: 1}}
