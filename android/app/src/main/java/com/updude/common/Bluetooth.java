@@ -43,6 +43,8 @@ public class Bluetooth {
         if (!this.isScanning)
             return;
 
+        this.isScanning = false;
+
         this.scanner.stopScan(this.scanCallback);
     }
 
