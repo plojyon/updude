@@ -44,12 +44,8 @@ export function startForegroundService() {
   LockModule.startForegroundService();
 }
 
-export function updateSettings(type, value) {
-  LockModule.updateSettings(type, value);
-}
-
-export function getSettings(callback) {
-  LockModule.getSettings(callback);
+export function wipeSettings(callback) {
+  LockModule.wipeSettings(callback);
 }
 
 export function startNFCread(callback) {
@@ -68,4 +64,22 @@ export function stopNFCread() {
   console.log('stopping NFC read');
   eventEmitter.removeAllListeners('NFCReadResult');
   return LockModule.stopReading();
+}
+
+export function getSettings(callback) {
+  console.log('get settings');
+  LockModule.getSettings(callback);
+}
+
+export function saveDevice(device) {
+  console.log('saving device');
+  console.log(`device.type:${device.type}`, `device.uuid:${device.uuid}`);
+  LockModule.updateSettings(device.type, device.uuid);
+  if (device.type != 'steps') {
+    console.log(
+      `device.type:${device.type}_name`,
+      `device.name:${device.name}`,
+    );
+    LockModule.updateSettings(`${device.type}_name`, device.name);
+  }
 }

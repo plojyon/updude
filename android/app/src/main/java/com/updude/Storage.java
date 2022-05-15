@@ -13,7 +13,7 @@ class Storage {
         editor.apply();
     }
 
-     static void remove(Context context, String key) {
+    static void remove(Context context, String key) {
         SharedPreferences preferences = getSharedPreferences(context);
         SharedPreferences.Editor editor = preferences.edit();
         editor.remove(key);
@@ -25,7 +25,12 @@ class Storage {
         return preferences.getString(key, null);
     }
 
-    private static SharedPreferences.Editor getEditor (Context context) {
+    static String wipeSettings(Context context, String key) {
+        SharedPreferences preferences = getSharedPreferences(context);
+        return preferences.getString(key, null);
+    }
+
+    private static SharedPreferences.Editor getEditor(Context context) {
         SharedPreferences sharedPreferences = getSharedPreferences(context);
         return sharedPreferences.edit();
     }

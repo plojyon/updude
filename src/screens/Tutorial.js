@@ -20,6 +20,9 @@ import {
   stopNFCread,
   stopScan,
   startForegroundService,
+  getSettings,
+  saveDevice,
+  wipeSettings,
 } from '../services/settings';
 
 const ChooseNFCScreen = ({navigation}) => {
@@ -445,9 +448,39 @@ export default () => (
 
 const TutorialScreen = ({route, navigation}) => {
   const [stepsNumber, setStepsNumber] = React.useState('200');
-  const [devices, setDevices] = React.useState([]);
+  const [devices, setDevices] = React.useState();
 
   useEffect(() => {
+    console.log(devices);
+    if (!devices) {
+      getSettings(obj => {
+        console.log('got settings');
+        const ot = [];
+        if ('ble' in obj) {
+          if (obj['ble'] != null)
+            ot.push({
+              type: 'ble',
+              name: obj['ble_name'],
+              uuid: obj['ble'],
+            });
+        }
+        if ('nfc' in obj) {
+          if (obj['nfc'] != null) {
+            ot.push({
+              type: 'nfc',
+              name: obj['nfc_name'],
+              uuid: obj['nfc'],
+            });
+          }
+        }
+        if ('steps' in obj) {
+          setStepsNumber(obj['steps']);
+        }
+
+        console.log(ot);
+        setDevices(ot);
+      });
+    }
     if (route.params && route.params.add_device) {
       console.log(route.params.add_device);
       if (
@@ -462,7 +495,7 @@ const TutorialScreen = ({route, navigation}) => {
         console.log('Device already added');
       }
     }
-  }, [route.params]);
+  }, [route.params, devices]);
 
   const onTextChanged = text => {
     setStepsNumber(text);
@@ -486,7 +519,7 @@ const TutorialScreen = ({route, navigation}) => {
           p="4">
           <Flex direction="row">
             <Text style={{color: 'white'}} flexShrink={1} fontSize={15}>
-              How many steps do you want to take today?
+              How many steps do you want to take before considered awake?
             </Text>
             <TextInput
               style={{
@@ -511,18 +544,29 @@ const TutorialScreen = ({route, navigation}) => {
           <Text style={{color: 'white'}} flexShrink={1} fontSize={15} mb="10">
             List of devices that will unlock your phone
           </Text>
-          {devices.map((dev, i) => (
-            <DeviceComponent
-              key={i}
-              type={dev.type}
-              name={dev.name}
-              on_side_press={() => setDevices(devices.filter(x => x != dev))}
-            />
-          ))}
+          {devices &&
+            devices.map((dev, i) => (
+              <DeviceComponent
+                key={i}
+                type={dev.type}
+                name={dev.name}
+                on_side_press={() => setDevices(devices.filter(x => x != dev))}
+              />
+            ))}
           <AddDeviceComponent onAdd={() => navigation.navigate('AddDevice')} />
         </Box>
         <Box borderRadius="5" width={'100%'} mt={5}>
-          <Button onPress={startForegroundService}>
+          <Button
+            onPress={() => {
+              console.log('wiping settings');
+              wipeSettings(() => {
+                console.log('Saving settings');
+
+                devices.forEach(dev => {
+                  saveDevice(dev);
+                });
+              });
+            }}>
             <Text>Save settings</Text>
           </Button>
         </Box>

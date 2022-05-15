@@ -108,17 +108,30 @@ public class LockModule extends ReactContextBaseJavaModule {
     public void getSettings(Callback callback) {
         Log.d("LockModule", "get settings");
         WritableMap map = new WritableNativeMap();
-        map.putString("type", Storage.get(getCurrentActivity(), "type"));
-        map.putString("value", Storage.get(getCurrentActivity(), "value"));
+        map.putString("ble", Storage.get(getCurrentActivity(), "ble"));
+        map.putString("nfc", Storage.get(getCurrentActivity(), "nfc"));
+        map.putString("steps", Storage.get(getCurrentActivity(), "steps"));
+        map.putString("ble_name", Storage.get(getCurrentActivity(), "ble_name"));
+        map.putString("nfc_name", Storage.get(getCurrentActivity(), "nfc_name"));
         Log.d("LockModule", map.toString());
         callback.invoke(map);
     }
 
     @ReactMethod
+    public void wipeSettings(Callback callback) {
+        Storage.remove(getCurrentActivity(), "ble");
+        Storage.remove(getCurrentActivity(), "nfc");
+        Storage.remove(getCurrentActivity(), "steps");
+        Storage.remove(getCurrentActivity(), "ble_name");
+        Storage.remove(getCurrentActivity(), "nfc_name");
+
+        callback.invoke();
+    }
+
+    @ReactMethod
     public void updateSettings(String type, String value) {
         Log.d("LockModule", "update settings");
-        Storage.update(getCurrentActivity(), "type", type);
-        Storage.update(getCurrentActivity(), "value", value);
+        Storage.update(getCurrentActivity(), type, value);
     }
 
     @ReactMethod
