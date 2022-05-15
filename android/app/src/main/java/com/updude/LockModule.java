@@ -61,6 +61,9 @@ public class LockModule extends ReactContextBaseJavaModule {
     public void enable() {
         lock.init(this.getCurrentActivity());
         lock.enable();
+    }
+
+    @ReactMethod
     public int stopReading() {
         if (this.adapter == null)
             return NOT_READING;
@@ -81,26 +84,26 @@ public class LockModule extends ReactContextBaseJavaModule {
         lock.lock();
     }
 
-	@ReactMethod
-	public void stopScan() {
-		bluetooth.init(this.getCurrentActivity());
-		bluetooth.stopScan();
-	}
+    @ReactMethod
+    public void stopScan() {
+        bluetooth.init(this.getCurrentActivity());
+        bluetooth.stopScan();
+    }
 
-	@ReactMethod
-	public void startScan() {
-		bluetooth.init(this.getCurrentActivity());
-		bluetooth.startScan(new DeviceCallback() {
+    @ReactMethod
+    public void startScan() {
+        bluetooth.init(this.getCurrentActivity());
+        bluetooth.startScan(new DeviceCallback() {
             @Override
             public void onResult(ArrayList<BluetoothDevice> devices) {
                 // TODO: test
                 for (BluetoothDevice device : devices) {
                     Log.d("LockModule", device.toString());
                 }
-                 sendEvent("BluetoothScanResult", serializeBluetoothDevices(devices));
+                sendEvent("BluetoothScanResult", serializeBluetoothDevices(devices));
             }
         });
-	}
+    }
 
     @ReactMethod
     public boolean isAdminActive() {
@@ -149,7 +152,7 @@ public class LockModule extends ReactContextBaseJavaModule {
         this.adapter.enableReaderMode(this.getCurrentActivity(), new NfcAdapter.ReaderCallback() {
             @Override
             public void onTagDiscovered(Tag tag) {
-                Log.d(LockModule.class.getName(), "Got tag id: "+bin2hex(tag.getId()));
+                Log.d(LockModule.class.getName(), "Got tag id: " + bin2hex(tag.getId()));
             }
         }, FLAG_READER_NFC_A, new Bundle());
 
@@ -157,6 +160,6 @@ public class LockModule extends ReactContextBaseJavaModule {
     }
 
     private static String bin2hex(byte[] data) {
-        return String.format("%0" + (data.length * 2) + "X", new BigInteger(1,data));
+        return String.format("%0" + (data.length * 2) + "X", new BigInteger(1, data));
     }
 }
